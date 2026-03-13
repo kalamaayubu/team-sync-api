@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  email      String       @unique
+  password   String
+  name       String
+  createdAt  DateTime     @default(now())
+  files      File[]
+  membership Membership[]
+  tasks      Task[]
+}
+
+model Team {
+  id         Int          @id @default(autoincrement())
+  name       String
+  createdAt  DateTime     @default(now())
+  membership Membership[]
+  tasks      Task[]
+}
+
+model Membership {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  teamId Int
+  role   String @default("member")
+  team   Team   @relation(fields: [teamId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("todo")
+  teamId      Int
+  creatorId   Int
+  createdAt   DateTime @default(now())
+  files       File[]
+  creator     User     @relation(fields: [creatorId], references: [id])
+  team        Team     @relation(fields: [teamId], references: [id])
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  name       String
+  url        String
+  taskId     Int
+  uploaderId Int
+  createdAt  DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id])
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+}
