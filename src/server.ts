@@ -1,17 +1,24 @@
 import "dotenv/config";
 import express from "express";
 import * as UserCtrl from "./controllers/user.controller.js";
+import * as TeamCtrl from "./controllers/team.controller.js";
+
 import { authenticate } from "./middleware/auth.middleware.js";
 
 const app = express();
 app.use(express.json());
 
+// User management operations
 app.post("/users/register", UserCtrl.registerUser);
 app.post("/users/login", UserCtrl.loginUser);
-
 app.get("/users/me", authenticate, UserCtrl.getMe);
 app.patch("/users/me", authenticate, UserCtrl.updateMe);
 app.delete("/users/me", authenticate, UserCtrl.deleteMe);
+
+// Team operations
+app.post("/teams", authenticate, TeamCtrl.createTeam);
+app.get("/teams/:id", authenticate, TeamCtrl.getTeam);
+app.post("/teams/:id/members", authenticate, TeamCtrl.inviteMember);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>
