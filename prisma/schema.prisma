@@ -48,6 +48,8 @@ model Task {
   files       File[]
   creator     User     @relation(fields: [creatorId], references: [id])
   team        Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([title, teamId])
 }
 
 model File {

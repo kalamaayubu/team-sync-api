@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import * as UserCtrl from "./controllers/user.controller.js";
 import * as TeamCtrl from "./controllers/team.controller.js";
+import * as TaskCtrl from "./controllers/task.controller.js";
 
 import { authenticate } from "./middleware/auth.middleware.js";
 
@@ -19,6 +20,12 @@ app.delete("/users/me", authenticate, UserCtrl.deleteMe);
 app.post("/teams", authenticate, TeamCtrl.createTeam);
 app.get("/teams/:id", authenticate, TeamCtrl.getTeam);
 app.post("/teams/:id/members", authenticate, TeamCtrl.inviteMember);
+
+// Task operations
+app.post("/teams/:id/tasks", authenticate, TaskCtrl.createTask);
+app.get("/teams/:id/tasks", authenticate, TaskCtrl.getTasks);
+app.patch("/teams/:teamId/tasks/:taskId", authenticate, TaskCtrl.updateTask);
+app.delete("/teams/:teamId/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>
