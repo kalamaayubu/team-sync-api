@@ -3,11 +3,15 @@ import express from "express";
 import * as UserCtrl from "./controllers/user.controller.js";
 import * as TeamCtrl from "./controllers/team.controller.js";
 import * as TaskCtrl from "./controllers/task.controller.js";
+import * as FileCtrl from "./controllers/file.controller.js";
 
 import { authenticate } from "./middleware/auth.middleware.js";
+import { upload } from "./lib/multer.js";
+import path from "node:path";
 
 const app = express();
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // User management operations
 app.post("/users/register", UserCtrl.registerUser);
@@ -26,6 +30,14 @@ app.post("/teams/:id/tasks", authenticate, TaskCtrl.createTask);
 app.get("/teams/:id/tasks", authenticate, TaskCtrl.getTasks);
 app.patch("/teams/:teamId/tasks/:taskId", authenticate, TaskCtrl.updateTask);
 app.delete("/teams/:teamId/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
+
+// File operations
+app.post(
+  "/tasks/:taskId/files",
+  authenticate,
+  upload.single("file"),
+  FileCtrl.handleFileUpload,
+);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>
