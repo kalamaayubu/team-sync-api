@@ -1,21 +1,24 @@
 import { z } from "zod";
 
-// Registration
+// Reusable parts for cleaner code
+const emailSchema = z.email("Invalid email address");
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters");
+
 export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: emailSchema,
+  password: passwordSchema,
 });
 
-// Login
 export const loginSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: emailSchema,
+  password: passwordSchema,
 });
 
-// Update User
 export const updateUserSchema = z.object({
   name: z.string().min(1).optional(),
-  email: z.email().optional(),
-  password: z.string().min(6).optional(),
+  email: emailSchema.optional(),
+  password: passwordSchema.optional(),
 });

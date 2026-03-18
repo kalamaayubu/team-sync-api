@@ -30,14 +30,14 @@ export const authenticateUser = async (data: any) => {
   });
 };
 
-export const getUserById = async (id: number) => {
+export const getUserById = async (id: string) => {
   return await prisma.user.findUnique({
     where: { id },
     select: { id: true, email: true, name: true, createdAt: true },
   });
 };
 
-export const updateUser = async (id: number, data: any) => {
+export const updateUser = async (id: string, data: any) => {
   return await prisma.user.update({
     where: { id },
     data,
@@ -45,6 +45,6 @@ export const updateUser = async (id: number, data: any) => {
   });
 };
 
-export const deleteUser = async (id: number) => {
+export const deleteUser = async (id: string) => {
   return await prisma.user.delete({ where: { id } });
 };

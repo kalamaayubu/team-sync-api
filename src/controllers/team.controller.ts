@@ -17,7 +17,7 @@ export const createTeam = async (req: Request, res: Response) => {
 
 export const getTeam = async (req: Request, res: Response) => {
   try {
-    const teamId = Number(req.params.id);
+    const teamId = req.params.id;
     const team = await teamService.getTeamById(teamId, req.user!.id);
 
     if (!team)
@@ -30,7 +30,7 @@ export const getTeam = async (req: Request, res: Response) => {
 
 export const inviteMember = async (req: Request, res: Response) => {
   try {
-    const teamId = Number(req.params.id);
+    const teamId = req.params.id;
     const { userId } = addMemberSchema.parse(req.body);
 
     const membership = await teamService.addMemberToTeam(

@@ -4,6 +4,7 @@ import * as UserCtrl from "./controllers/user.controller.js";
 import * as TeamCtrl from "./controllers/team.controller.js";
 import * as TaskCtrl from "./controllers/task.controller.js";
 import * as FileCtrl from "./controllers/file.controller.js";
+import invitationRoutes from "./routes/invitation.routes.js";
 
 import { authenticate } from "./middleware/auth.middleware.js";
 import { upload } from "./lib/multer.js";
@@ -40,6 +41,8 @@ app.post(
 );
 app.get("/tasks/:taskId/files", authenticate, FileCtrl.getFiles);
 app.delete("/files/:fileId", authenticate, FileCtrl.removeFile);
+
+app.use("/api/invitations", invitationRoutes);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>

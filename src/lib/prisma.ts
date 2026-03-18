@@ -1,4 +1,4 @@
-// Singleton instance of the Prisma client
+// Singleton instance of Prisma client
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 

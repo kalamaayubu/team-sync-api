@@ -13,7 +13,7 @@ export const authenticate = (
   try {
     console.log("Secret used for verification:", process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: number;
+      id: string;
       email: string;
     };
     req.user = decoded;

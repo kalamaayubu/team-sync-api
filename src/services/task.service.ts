@@ -4,8 +4,8 @@ import { ensureMembership } from "../utils/guards.js";
 export const createTask = async (data: {
   title: string;
   description: string;
-  teamId: number;
-  creatorId: number;
+  teamId: string;
+  creatorId: string;
 }) => {
   await ensureMembership(data.teamId, data.creatorId);
 
@@ -20,7 +20,7 @@ export const createTask = async (data: {
   });
 };
 
-export const getTeamTasks = async (teamId: number, userId: number) => {
+export const getTeamTasks = async (teamId: string, userId: string) => {
   await ensureMembership(teamId, userId);
 
   return await prisma.task.findMany({
@@ -29,7 +29,7 @@ export const getTeamTasks = async (teamId: number, userId: number) => {
   });
 };
 
-export const updateTask = async (taskId: number, userId: number, data: any) => {
+export const updateTask = async (taskId: string, userId: string, data: any) => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });
@@ -43,7 +43,7 @@ export const updateTask = async (taskId: number, userId: number, data: any) => {
   });
 };
 
-export const deleteTask = async (taskId: number, userId: number) => {
+export const deleteTask = async (taskId: string, userId: string) => {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
   });

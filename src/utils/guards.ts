@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 
-export const ensureMembership = async (teamId: number, userId: number) => {
+export const ensureMembership = async (teamId: string, userId: string) => {
   const membership = await prisma.membership.findFirst({
     where: { teamId, userId },
   });

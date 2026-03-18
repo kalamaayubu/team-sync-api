@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { IdSchema } from "./shared.validator.js";
 
 export const createTeamSchema = z.object({
   name: z.string().min(3).max(50),
 });
 
 export const addMemberSchema = z.object({
-  userId: z.number(),
-  role: z.enum(["admin", "member"]).default("member"),
+  userId: IdSchema,
+  role: z.enum(["SYS_ADMIN", "ADMIN", "MEMBER"]).default("MEMBER"),
 });

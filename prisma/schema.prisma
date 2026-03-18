@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id         Int          @id @default(autoincrement())
+  id        String   @id @default(cuid())
   email      String       @unique
   password   String
   name       String
@@ -19,18 +19,19 @@ model User {
 }
 
 model Team {
-  id         Int          @id @default(autoincrement())
-  name       String
-  createdAt  DateTime     @default(now())
-  membership Membership[]
-  tasks      Task[]
+  id        String   @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  membership  Membership[]
+  tasks       Task[]
+  invitations Invitation[]
 }
 
 model Membership {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  teamId Int
-  role   String @default("member")
+  id        String   @id @default(cuid())
+  userId String
+  teamId String
+  role   String @default("MEMBER")
   team   Team   @relation(fields: [teamId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 
@@ -38,12 +39,12 @@ model Membership {
 }
 
 model Task {
-  id          Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   title       String
   description String?
   status      String   @default("todo")
-  teamId      Int
-  creatorId   Int
+  teamId      String
+  creatorId   String
   createdAt   DateTime @default(now())
   files       File[]
   creator     User     @relation(fields: [creatorId], references: [id])
@@ -53,12 +54,25 @@ model Task {
 }
 
 model File {
-  id         Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name       String
   url        String
-  taskId     Int
-  uploaderId Int
+  taskId     String
+  uploaderId String
   createdAt  DateTime @default(now())
   task       Task     @relation(fields: [taskId], references: [id])
   uploader   User     @relation(fields: [uploaderId], references: [id])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  teamId    String
+  role      String   @default("member")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([email, teamId])
 }

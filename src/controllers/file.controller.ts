@@ -22,7 +22,7 @@ export const handleFileUpload = async (req: Request, res: Response) => {
       const fileRecord = await fileService.uploadFile({
         name: req.file.originalname,
         url: `/uploads/${req.file.filename}`,
-        taskId: Number(req.params.taskId),
+        taskId: req.params.taskId,
         uploaderId: req.user!.id,
       });
 
@@ -36,7 +36,7 @@ export const handleFileUpload = async (req: Request, res: Response) => {
 export const getFiles = async (req: Request, res: Response) => {
   try {
     const files = await fileService.getTaskFiles(
-      Number(req.params.taskId),
+      req.params.taskId,
       req.user!.id,
     );
     res.json(files);
@@ -47,7 +47,7 @@ export const getFiles = async (req: Request, res: Response) => {
 
 export const removeFile = async (req: Request, res: Response) => {
   try {
-    await fileService.deleteFile(Number(req.params.fileId), req.user!.id);
+    await fileService.deleteFile(req.params.fileId, req.user!.id);
     res.status(204).send();
   } catch (error: any) {
     res.status(403).json({ error: error.message });

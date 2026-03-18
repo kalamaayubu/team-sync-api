@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 
-export const createTeam = async (name: string, ownerId: number) => {
+export const createTeam = async (name: string, ownerId: string) => {
   return await prisma.team.create({
     data: {
       name,
@@ -17,7 +17,7 @@ export const createTeam = async (name: string, ownerId: number) => {
   });
 };
 
-export const getTeamById = async (teamId: number, requestingUserId: number) => {
+export const getTeamById = async (teamId: string, requestingUserId: string) => {
   return await prisma.team.findFirst({
     where: {
       id: teamId,
@@ -38,9 +38,9 @@ export const getTeamById = async (teamId: number, requestingUserId: number) => {
 };
 
 export const addMemberToTeam = async (
-  teamId: number,
-  adminId: number,
-  userId: number,
+  teamId: string,
+  adminId: string,
+  userId: string,
 ) => {
   const adminMembership = await prisma.membership.findFirst({
     where: {

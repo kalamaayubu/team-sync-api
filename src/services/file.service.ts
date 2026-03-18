@@ -5,12 +5,12 @@ import fs from "fs/promises";
 export const uploadFile = async (data: {
   name: string;
   url: string;
-  taskId: number;
-  uploaderId: number;
+  taskId: string;
+  uploaderId: string;
 }) => {
   // Find the task to get the teamId
   const task = await prisma.task.findUnique({
-    where: { id: Number(data.taskId) },
+    where: { id: data.taskId },
   });
   if (!task) throw new Error("Task not found");
 
@@ -27,7 +27,7 @@ export const uploadFile = async (data: {
   });
 };
 
-export const getTaskFiles = async (taskId: number, userId: number) => {
+export const getTaskFiles = async (taskId: string, userId: string) => {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task) throw new Error("Task not found");
 
@@ -36,7 +36,7 @@ export const getTaskFiles = async (taskId: number, userId: number) => {
   return await prisma.file.findMany({ where: { taskId } });
 };
 
-export const deleteFile = async (fileId: number, userId: number) => {
+export const deleteFile = async (fileId: string, userId: string) => {
   const file = await prisma.file.findUnique({
     include: { task: true },
     where: { id: fileId },

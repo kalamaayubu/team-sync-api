@@ -3,13 +3,13 @@ import * as taskService from "../services/task.service.js";
 
 export const createTask = async (req: Request, res: Response) => {
   try {
-    const teamId = Number(req.params.id);
+    const teamId = req.params.id;
     const { title, description } = req.body;
 
     const task = await taskService.createTask({
       title,
       description,
-      teamId: Number(teamId),
+      teamId: teamId,
       creatorId: req.user!.id,
     });
 
@@ -30,10 +30,7 @@ export const getTasks = async (req: Request, res: Response) => {
     console.log("Team ID from URL:", req.params.id);
     console.log("User ID from Token:", req.user?.id);
 
-    const tasks = await taskService.getTeamTasks(
-      Number(req.params.id),
-      req.user!.id,
-    );
+    const tasks = await taskService.getTeamTasks(req.params.id, req.user!.id);
     res.status(200).json(tasks);
   } catch (error: any) {
     res
@@ -45,7 +42,7 @@ export const getTasks = async (req: Request, res: Response) => {
 export const updateTask = async (req: Request, res: Response) => {
   try {
     const task = await taskService.updateTask(
-      Number(req.params.taskId),
+      req.params.taskId,
       req.user!.id,
       req.body,
     );
@@ -59,7 +56,7 @@ export const updateTask = async (req: Request, res: Response) => {
 
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    await taskService.deleteTask(Number(req.params.taskId), req.user!.id);
+    await taskService.deleteTask(req.params.taskId, req.user!.id);
     res.status(204).send(); // 204 No Content for successful deletion
   } catch (error: any) {
     res
