@@ -38,6 +38,8 @@ app.post(
   upload.single("file"),
   FileCtrl.handleFileUpload,
 );
+app.get("/tasks/:taskId/files", authenticate, FileCtrl.getFiles);
+app.delete("/files/:fileId", authenticate, FileCtrl.removeFile);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>
