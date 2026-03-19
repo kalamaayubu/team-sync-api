@@ -69,7 +69,7 @@ model Invitation {
   email     String
   token     String   @unique
   teamId    String
-  role      String   @default("member")
+  role      String   @default("MEMBER")
   expiresAt DateTime
   createdAt DateTime @default(now())
   team      Team     @relation(fields: [teamId], references: [id])

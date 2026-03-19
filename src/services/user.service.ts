@@ -20,7 +20,7 @@ export const createUser = async (data: any) => {
 
 export const authenticateUser = async (data: any) => {
   const user = await prisma.user.findUnique({ where: { email: data.email } });
-  if (!user) throw new Error("Invalid credentials");
+  if (!user) throw new Error("Please create an account to be able to log in");
 
   const isValid = await bcrypt.compare(data.password, user.password);
   if (!isValid) throw new Error("Invalid credentials");

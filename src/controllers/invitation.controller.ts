@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import * as InvitationService from "../services/invitation.service.js";
+import { ParamsIdSchema } from "../validators/shared.validator.js";
 
 export const sendInvite = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    const teamId = req.params.teamId;
+    const { id: teamId } = ParamsIdSchema.parse(req.params);
 
     // Create the invite record
     const invite = await InvitationService.createInvitation(email, teamId);

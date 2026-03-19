@@ -1,13 +1,25 @@
 import { prisma } from "../lib/prisma.js";
 
 export const createTeam = async (name: string, ownerId: string) => {
+  // A user can create a maximum of 4 teams
+  const teamCount = await prisma.membership.count({
+    where: {
+      userId: ownerId,
+      role: "ADMIN",
+    },
+  });
+
+  if (teamCount >= 4) {
+    throw new Error("Maximum limit of 4 teams reached.");
+  }
+
   return await prisma.team.create({
     data: {
       name,
       membership: {
         create: {
           userId: ownerId,
-          role: "admin",
+          role: "ADMIN",
         },
       },
     },
@@ -40,24 +52,58 @@ export const getTeamById = async (teamId: string, requestingUserId: string) => {
 export const addMemberToTeam = async (
   teamId: string,
   adminId: string,
-  userId: string,
+  inviteeEmail: string,
 ) => {
+  // Find the invitee by email
+  const invitee = await prisma.user.findUnique({
+    where: { email: inviteeEmail.toLowerCase() },
+  });
+
+  console.log("INVITEEID: ", invitee?.id);
+
+  if (!invitee) {
+    throw new Error("User with this email does not exist.");
+  }
+
+  if (invitee.id === adminId) {
+    throw new Error("You are already the admin of this team.");
+  }
+
+  // Ensure user is an ADMIN of this team
   const adminMembership = await prisma.membership.findFirst({
     where: {
       teamId,
       userId: adminId,
-      role: "admin",
+      role: "ADMIN",
     },
   });
 
-  if (!adminMembership) {
-    throw new Error("Unauthorized: Only team admins can invite members.");
+  if (!adminMembership || adminMembership.role !== "ADMIN") {
+    throw new Error("Unauthorized: Only team admins can add members.");
   }
 
+  // Check if target user is already a in the team
+  const existingMembership = await prisma.membership.findUnique({
+    where: {
+      userId_teamId: { userId: invitee.id, teamId },
+    },
+  });
+
+  if (existingMembership) {
+    throw new Error("This user is already a member of the team.");
+  }
+
+  console.log("ADDING MEMBER: ", { teamId, invitee });
   return await prisma.membership.create({
     data: {
       teamId,
-      userId,
+      userId: invitee.id,
+      role: "MEMBER",
+    },
+    include: {
+      user: {
+        select: { name: true, email: true },
+      },
     },
   });
 };

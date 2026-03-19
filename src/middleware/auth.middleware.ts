@@ -11,7 +11,6 @@ export const authenticate = (
 
   const token = authHeader.split(" ")[1];
   try {
-    console.log("Secret used for verification:", process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
       email: string;

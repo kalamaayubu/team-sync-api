@@ -4,6 +4,7 @@ import {
   addMemberSchema,
   createTeamSchema,
 } from "../validators/team.validator.js";
+import { ParamsIdSchema } from "../validators/shared.validator.js";
 
 export const createTeam = async (req: Request, res: Response) => {
   try {
@@ -17,7 +18,7 @@ export const createTeam = async (req: Request, res: Response) => {
 
 export const getTeam = async (req: Request, res: Response) => {
   try {
-    const teamId = req.params.id;
+    const { id: teamId } = ParamsIdSchema.parse(req.params);
     const team = await teamService.getTeamById(teamId, req.user!.id);
 
     if (!team)
@@ -28,17 +29,17 @@ export const getTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const inviteMember = async (req: Request, res: Response) => {
+export const addMember = async (req: Request, res: Response) => {
   try {
-    const teamId = req.params.id;
-    const { userId } = addMemberSchema.parse(req.body);
+    const { id: teamId } = ParamsIdSchema.parse(req.params);
+    const { email } = addMemberSchema.parse(req.body);
 
-    const membership = await teamService.addMemberToTeam(
+    const newMember = await teamService.addMemberToTeam(
       teamId,
       req.user!.id,
-      userId,
+      email,
     );
-    res.status(201).json(membership);
+    res.status(201).json(newMember);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
