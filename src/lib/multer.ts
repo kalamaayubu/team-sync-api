@@ -8,7 +8,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
@@ -19,8 +19,8 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
+  limits: { fileSize: 3 * 1024 * 1024, fieldNameSize: 50 },
+  fileFilter: (_req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|pdf/;
     const extname = allowedTypes.test(
       path.extname(file.originalname).toLowerCase(),

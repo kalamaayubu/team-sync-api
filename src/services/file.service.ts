@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { ensureMembership } from "../utils/guards.js";
 import fs from "fs/promises";
+import path from "path";
 
 export const uploadFile = async (data: {
   name: string;
@@ -48,7 +49,8 @@ export const deleteFile = async (fileId: string, userId: string) => {
 
   // Remove from local storage
   try {
-    await fs.unlink(file.url);
+    const filePath = path.join(process.cwd(), file.url);
+    await fs.unlink(filePath);
   } catch (error) {
     console.error("File already gone from disk, proceeding to DB cleanup.");
   }

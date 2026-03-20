@@ -1,55 +1,16 @@
-import { Request, Response } from "express";
-import * as userService from "../services/user.service.js";
-import {
-  registerSchema,
-  loginSchema,
-  updateUserSchema,
-} from "../validators/user.validator.js";
+import { Router } from "express";
+import * as UserCtrl from "../controllers/user.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
-export const registerUser = async (req: Request, res: Response) => {
-  try {
-    const validated = registerSchema.parse(req.body);
-    const user = await userService.createUser(validated);
-    res.status(201).json(user);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-};
+const router = Router();
 
-export const loginUser = async (req: Request, res: Response) => {
-  try {
-    const validated = loginSchema.parse(req.body);
-    const token = await userService.authenticateUser(validated);
-    res.json({ token });
-  } catch (err: any) {
-    res.status(401).json({ error: err.message });
-  }
-};
+// Public routes
+router.post("/register", UserCtrl.registerUser);
+router.post("/login", UserCtrl.loginUser);
 
-export const getMe = async (req: Request, res: Response) => {
-  try {
-    const user = await userService.getUserById(req.user!.id);
-    res.json(user);
-  } catch (err: any) {
-    res.status(404).json({ error: err.message });
-  }
-};
+// Protected routes
+router.get("/me", authenticate, UserCtrl.getMe);
+router.patch("/me", authenticate, UserCtrl.updateMe);
+router.delete("/me", authenticate, UserCtrl.deleteMe);
 
-export const updateMe = async (req: Request, res: Response) => {
-  try {
-    const validated = updateUserSchema.parse(req.body);
-    const updated = await userService.updateUser(req.user!.id, validated);
-    res.json(updated);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-export const deleteMe = async (req: Request, res: Response) => {
-  try {
-    await userService.deleteUser(req.user!.id);
-    res.status(204).send();
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-};
+export default router;

@@ -16,6 +16,7 @@ export const authenticate = (
       email: string;
     };
     req.user = decoded;
+
     next();
   } catch (err: any) {
     console.error("JWT Verification Error:", err.message); // This will log the specific reason

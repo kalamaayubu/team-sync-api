@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import * as taskService from "../services/task.service.js";
+import { ParamsIdSchema } from "../validators/shared.validator.js";
 
 export const createTask = async (req: Request, res: Response) => {
   try {
-    const teamId = req.params.id;
+    const { teamId } = ParamsIdSchema.parse(req.params);
     const { title, description } = req.body;
 
     const task = await taskService.createTask({
       title,
       description,
-      teamId: teamId,
+      teamId: teamId as string,
       creatorId: req.user!.id,
     });
 
@@ -27,10 +28,16 @@ export const createTask = async (req: Request, res: Response) => {
 
 export const getTasks = async (req: Request, res: Response) => {
   try {
-    console.log("Team ID from URL:", req.params.id);
+    console.log("Team ID from URL:", req.params.teamId);
     console.log("User ID from Token:", req.user?.id);
 
-    const tasks = await taskService.getTeamTasks(req.params.id, req.user!.id);
+    // Validate teamId
+    const { teamId } = ParamsIdSchema.parse(req.params);
+
+    const tasks = await taskService.getTeamTasks(
+      teamId as string,
+      req.user!.id,
+    );
     res.status(200).json(tasks);
   } catch (error: any) {
     res
@@ -41,8 +48,11 @@ export const getTasks = async (req: Request, res: Response) => {
 
 export const updateTask = async (req: Request, res: Response) => {
   try {
+    // Validate both teamId and taskId
+    const { teamId, taskId } = ParamsIdSchema.parse(req.params);
+
     const task = await taskService.updateTask(
-      req.params.taskId,
+      taskId as string,
       req.user!.id,
       req.body,
     );
@@ -56,8 +66,11 @@ export const updateTask = async (req: Request, res: Response) => {
 
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    await taskService.deleteTask(req.params.taskId, req.user!.id);
-    res.status(204).send(); // 204 No Content for successful deletion
+    // Validate taskId
+    const { taskId } = ParamsIdSchema.parse(req.params);
+
+    await taskService.deleteTask(taskId as string, req.user!.id);
+    res.status(204).send();
   } catch (error: any) {
     res
       .status(error.message === "Unauthorized" ? 403 : 400)
