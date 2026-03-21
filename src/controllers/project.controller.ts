@@ -1,0 +1,111 @@
+import { Request, Response } from "express";
+import * as ProjectService from "../services/project.service.js";
+import { Prisma } from "../generated/prisma/client.js";
+
+export const createProjectHandler = async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params;
+    const { name, description } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({
+        error: "Project name and description are required",
+      });
+    }
+
+    if (!teamId || !req.user?.id) {
+      return res.status(400).json({
+        error: "Missing required parameters",
+      });
+    }
+
+    const project = await ProjectService.createProject({
+      name,
+      description,
+      teamId: teamId as string,
+      authorId: req.user!.id,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: project,
+    });
+  } catch (error) {
+    console.error("Failed to create project", error);
+
+    // Handle unique constraint violation
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return res.status(409).json({
+        error: `A project with the name "${req.body.name}" already exists in this team`,
+      });
+    }
+
+    return res.status(400).json({
+      error:
+        error instanceof Error ? error.message : "Failed to create project",
+    });
+  }
+};
+
+export const getProjectsHandler = async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params;
+
+    if (!teamId || !req.user?.id) {
+      return res.status(400).json({
+        error: "Missing required parameters",
+      });
+    }
+
+    const teamProjects = await ProjectService.getTeamProjects({
+      teamId: teamId as string,
+      userId: req.user!.id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: teamProjects,
+    });
+  } catch (error) {
+    console.error("Failed to fetch projects", error);
+    return res.status(400).json({
+      error:
+        error instanceof Error ? error.message : "Failed to fetch projects",
+    });
+  }
+};
+
+export const getProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { teamId, projectId } = req.params;
+
+    if (!req.user?.id || !teamId || !projectId) {
+      return res.status(400).json({
+        error: "Missing required parameters: userId, teamId, or projectId",
+      });
+    }
+
+    const project = await ProjectService.getProjectById(
+      teamId as string,
+      req.user?.id,
+      projectId as string,
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        error: "Project not found",
+      });
+    }
+
+    return res.status(200).json({ success: true, data: project });
+  } catch (error) {
+    console.error("Failed to fetch project", error);
+    return res.status(400).json({
+      error: error instanceof Error ? error.message : "Failed to fetch project",
+    });
+  }
+};

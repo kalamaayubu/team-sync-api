@@ -11,3 +11,15 @@ export const ensureMembership = async (teamId: string, userId: string) => {
 
   return membership;
 };
+
+export const ensureIsAdmin = async (teamId: string, userId: string) => {
+  const admin = await prisma.membership.findFirst({
+    where: { teamId, userId, role: "ADMIN" },
+  });
+
+  if (!admin) {
+    throw new Error("Unauthorized: Only admin can create project.");
+  }
+
+  return admin;
+};

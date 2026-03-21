@@ -3,6 +3,7 @@ import express from "express";
 import userRoutes from "./routes/user.routes.js";
 import fileRoutes from "./routes/file.routes.js";
 import teamsRoutes from "./routes/team.routes.js";
+import projectRoutes from "./routes/project.route.js";
 
 import path from "node:path";
 
@@ -14,6 +15,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api", fileRoutes);
 app.use("/api/teams", teamsRoutes);
+app.use("/api", projectRoutes);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () =>

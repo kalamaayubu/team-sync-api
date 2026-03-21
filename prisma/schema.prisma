@@ -13,6 +13,8 @@ model User {
   password   String
   name       String
   createdAt  DateTime     @default(now())
+
+  projects Project[]
   files      File[]
   membership Membership[]
   tasks      Task[]
@@ -85,8 +87,12 @@ model Project {
   id String @id @default(cuid())
   name String @db.VarChar(100)
   description String @db.Text
+
   teamId String
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
 
   coverImageId String? 
   coverImage File? @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
