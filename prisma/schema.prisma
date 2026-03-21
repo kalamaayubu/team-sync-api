@@ -22,9 +22,11 @@ model Team {
   id        String   @id @default(cuid())
   name        String
   createdAt   DateTime     @default(now())
+
   membership  Membership[]
   tasks       Task[]
   invitations Invitation[]
+  projects Project[]
 }
 
 model Membership {
@@ -62,6 +64,8 @@ model File {
   createdAt  DateTime @default(now())
   task       Task     @relation(fields: [taskId], references: [id])
   uploader   User     @relation(fields: [uploaderId], references: [id])
+  
+  projectCover Project[]
 }
 
 model Invitation {
@@ -75,4 +79,21 @@ model Invitation {
   team      Team     @relation(fields: [teamId], references: [id])
 
   @@unique([email, teamId])
+}
+
+model Project {
+  id String @id @default(cuid())
+  name String @db.VarChar(100)
+  description String @db.Text
+  teamId String
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  coverImageId String? 
+  coverImage File? @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, teamId])
 }
