@@ -69,7 +69,6 @@ export const getProjectById = async (
   const project = await prisma.project.findUnique({
     where: {
       id: projectId,
-      //   teamId,
     },
     select: {
       id: true,
@@ -84,4 +83,28 @@ export const getProjectById = async (
   });
 
   return project;
+};
+
+export const deleteProjectById = async (
+  projectId: string,
+  userId: string,
+  teamId: string,
+) => {
+  // Membership check
+  await ensureMembership(teamId, userId);
+
+  // Delete project with deleteMany() to get the count
+  const { count } = await prisma.project.deleteMany({
+    where: {
+      authorId: userId,
+      id: projectId,
+      teamId: teamId,
+    },
+  });
+
+  if (count === 0) {
+    throw new Error("Action denied: You are not the author of this project.");
+  }
+
+  return { id: projectId, deleted: true };
 };

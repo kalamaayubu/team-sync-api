@@ -109,3 +109,46 @@ export const getProjectByIdHandler = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Delete project
+export const deleteProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { teamId, projectId } = req.params;
+
+    if (!projectId) {
+      return res.status(400).json({
+        error: "Bad Request",
+      });
+    }
+
+    if (!req.user?.id || !teamId) {
+      return res.status(403).json({
+        error: "Unauthorized",
+      });
+    }
+
+    await ProjectService.deleteProjectById(
+      projectId as string,
+      req.user!.id,
+      teamId as string,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Project deleted successful",
+      data: {},
+    });
+  } catch (error: any) {
+    console.error("Error in deleteProjectByIdHandler:", error);
+    // Error mapping
+    const isClientError =
+      error.message.includes("permission") ||
+      error.message.includes("not found");
+
+    return res.status(isClientError ? 403 : 500).json({
+      success: false,
+      message: isClientError ? error.message : "Internal Server Error",
+      error: error.message,
+    });
+  }
+};

@@ -20,6 +20,10 @@ router.get(
   ProjectCtrl.getProjectByIdHandler,
 );
 router.put("/projects/:projectId", authenticate);
-router.post("/projects/:projectId", authenticate);
+router.delete(
+  "/:teamId/projects/:projectId",
+  authenticate,
+  ProjectCtrl.deleteProjectByIdHandler,
+);
 
 export default router;
