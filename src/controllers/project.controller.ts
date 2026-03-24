@@ -13,6 +13,18 @@ export const createProjectHandler = async (req: Request, res: Response) => {
       });
     }
 
+    if (name.length > 20) {
+      return res.status(400).json({
+        error: "Project name must not exceed 20 characters",
+      });
+    }
+
+    if (description.length > 150) {
+      return res.status(400).json({
+        error: "Project description must not exceed 150 characters",
+      });
+    }
+
     if (!teamId || !req.user?.id) {
       return res.status(400).json({
         error: "Missing required parameters",
@@ -140,7 +152,6 @@ export const deleteProjectByIdHandler = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error in deleteProjectByIdHandler:", error);
-    // Error mapping
     const isClientError =
       error.message.includes("permission") ||
       error.message.includes("not found");

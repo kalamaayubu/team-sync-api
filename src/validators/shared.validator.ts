@@ -7,6 +7,7 @@ export const IdSchema = z.cuid();
 export const ParamsIdSchema = z.object({
   id: z.string().optional(),
   teamId: z.string().optional(),
+  projectId: z.string().optional(),
   taskId: z.string().optional(),
   fileId: z.string().optional(),
 });

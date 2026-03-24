@@ -9,12 +9,12 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  email      String       @unique
-  password   String
-  name       String
-  createdAt  DateTime     @default(now())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
 
-  projects Project[]
+  projects   Project[]
   files      File[]
   membership Membership[]
   tasks      Task[]
@@ -22,17 +22,16 @@ model User {
 
 model Team {
   id        String   @id @default(cuid())
-  name        String
-  createdAt   DateTime     @default(now())
+  name      String
+  createdAt DateTime @default(now())
 
+  projects    Project[]
   membership  Membership[]
-  tasks       Task[]
   invitations Invitation[]
-  projects Project[]
 }
 
 model Membership {
-  id        String   @id @default(cuid())
+  id     String @id @default(cuid())
   userId String
   teamId String
   role   String @default("MEMBER")
@@ -43,31 +42,41 @@ model Membership {
 }
 
 model Task {
-  id        String   @id @default(cuid())
+  id          String @id @default(cuid())
   title       String
-  description String?
-  status      String   @default("todo")
-  teamId      String
-  creatorId   String
-  createdAt   DateTime @default(now())
-  files       File[]
-  creator     User     @relation(fields: [creatorId], references: [id])
-  team        Team     @relation(fields: [teamId], references: [id])
+  description String
+  status      String @default("todo")
 
-  @@unique([title, teamId])
+  // Task belong to a project
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  files     File[]
+
+  @@unique([title, projectId])
 }
 
 model File {
-  id        String   @id @default(cuid())
+  id         String   @id @default(cuid())
   name       String
   url        String
-  taskId     String
   uploaderId String
   createdAt  DateTime @default(now())
-  task       Task     @relation(fields: [taskId], references: [id])
-  uploader   User     @relation(fields: [uploaderId], references: [id])
-  
-  projectCover Project[]
+
+  // File belong to a task, otherwise its global
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id])
+
+  projectId String
+  project   Project @relation("ProjectFiles", fields: [projectId], references: [id], onDelete: Cascade)
+
+  uploader User @relation(fields: [uploaderId], references: [id])
+
+  ProjectCoverImage Project? @relation("ProjectCoverImage")
 }
 
 model Invitation {
@@ -84,20 +93,24 @@ model Invitation {
 }
 
 model Project {
-  id String @id @default(cuid())
-  name String @db.VarChar(100)
+  id          String @id @default(cuid())
+  name        String @db.VarChar(100)
   description String @db.Text
 
   teamId String
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   authorId String
-  author User @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id])
 
-  coverImageId String? 
-  coverImage File? @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
+  // Project tasks and files
+  tasks Task[]
+  files File[] @relation("ProjectFiles")
 
-  isActive Boolean @default(true)
+  coverImageId String? @unique
+  coverImage   File?   @relation("ProjectCoverImage", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

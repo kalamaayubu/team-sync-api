@@ -4,13 +4,13 @@ import { ParamsIdSchema } from "../validators/shared.validator.js";
 
 export const createTask = async (req: Request, res: Response) => {
   try {
-    const { teamId } = ParamsIdSchema.parse(req.params);
+    const { projectId } = ParamsIdSchema.parse(req.params);
     const { title, description } = req.body;
 
     const task = await taskService.createTask({
       title,
       description,
-      teamId: teamId as string,
+      projectId: projectId as string,
       creatorId: req.user!.id,
     });
 
@@ -18,7 +18,7 @@ export const createTask = async (req: Request, res: Response) => {
   } catch (error: any) {
     if (error.code === "P2002") {
       return res.status(409).json({
-        error: `A task with the title "${req.body.title}" already exists in this team.`,
+        error: `A task with the title "${req.body.title}" already exists in this project.`,
       });
     }
     const status = error.message.includes("Unauthorized") ? 403 : 400;
@@ -32,10 +32,10 @@ export const getTasks = async (req: Request, res: Response) => {
     console.log("User ID from Token:", req.user?.id);
 
     // Validate teamId
-    const { teamId } = ParamsIdSchema.parse(req.params);
+    const { projectId } = ParamsIdSchema.parse(req.params);
 
     const tasks = await taskService.getTeamTasks(
-      teamId as string,
+      projectId as string,
       req.user!.id,
     );
     res.status(200).json(tasks);
@@ -66,7 +66,6 @@ export const updateTask = async (req: Request, res: Response) => {
 
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    // Validate taskId
     const { taskId } = ParamsIdSchema.parse(req.params);
 
     await taskService.deleteTask(taskId as string, req.user!.id);

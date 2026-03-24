@@ -16,9 +16,9 @@ router.post("/:teamId/invite", authenticate, InviteCtrl.sendInvite);
 router.post("/accept", authenticate, InviteCtrl.acceptInvite);
 
 // Task operations
-router.post("/:teamId/tasks", authenticate, TaskCtrl.createTask);
-router.get("/:teamId/tasks", authenticate, TaskCtrl.getTasks);
-router.patch("/:teamId/tasks/:taskId", authenticate, TaskCtrl.updateTask);
-router.delete("/:teamId/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
+router.post("/:projectId/tasks", authenticate, TaskCtrl.createTask);
+router.get("/:projectId/tasks", authenticate, TaskCtrl.getTasks);
+router.patch("/:projectId/tasks/:taskId", authenticate, TaskCtrl.updateTask);
+router.delete("/:projectId/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
 
 export default router;

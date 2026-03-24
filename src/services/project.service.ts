@@ -25,6 +25,10 @@ export const createProject = async ({
       teamId,
       authorId,
     },
+    select: {
+      id: true,
+      name: true,
+    },
   });
 
   return project;
