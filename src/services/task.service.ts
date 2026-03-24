@@ -1,3 +1,4 @@
+import { eventEmitter, EVENTS } from "../lib/events.js";
 import { prisma } from "../lib/prisma.js";
 import { ensureMembership } from "../utils/guards.js";
 
@@ -17,7 +18,7 @@ export const createTask = async (data: {
   await ensureMembership(project.teamId, data.creatorId);
 
   // Create task
-  return await prisma.task.create({
+  const newTask = await prisma.task.create({
     data: {
       title: data.title,
       description: data.description,
@@ -28,10 +29,21 @@ export const createTask = async (data: {
       id: true,
       title: true,
       description: true,
-      status: true,
-      createdAt: true,
+      creator: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
+
+  // Emit task creation event
+  eventEmitter.emit(EVENTS.TASK.CREATED, {
+    task: newTask,
+    creatorName: newTask.creator.name,
+  });
+
+  return newTask;
 };
 
 export const getTeamTasks = async (projectId: string, userId: string) => {
@@ -57,19 +69,24 @@ export const getTeamTasks = async (projectId: string, userId: string) => {
 };
 
 export const updateTask = async (taskId: string, userId: string, data: any) => {
+  // Fetch task to get teamId for membership checks
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: { project: { select: { teamId: true } } },
   });
 
   if (!task) throw new Error("Task not found");
-
   await ensureMembership(task.project.teamId, userId);
 
-  return await prisma.task.update({
+  const updatedTask = await prisma.task.update({
     where: { id: taskId },
     data,
   });
+
+  // Emit task update event
+  eventEmitter.emit(EVENTS.TASK.UPDATED, { task: updatedTask });
+
+  return updatedTask;
 };
 
 export const deleteTask = async (taskId: string, userId: string) => {
@@ -79,8 +96,13 @@ export const deleteTask = async (taskId: string, userId: string) => {
   });
 
   if (!task) throw new Error("Task not found");
-
+  if (task.creatorId !== userId)
+    throw new Error("Unauthorized: Only the creator can delete this task.");
   await ensureMembership(task.project.teamId, userId);
 
-  return await prisma.task.delete({ where: { id: taskId } });
+  const deletedTask = await prisma.task.delete({ where: { id: taskId } });
+
+  eventEmitter.emit(EVENTS.TASK.DELETED, {
+    task: deletedTask,
+  });
 };

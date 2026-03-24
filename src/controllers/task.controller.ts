@@ -38,7 +38,7 @@ export const getTasks = async (req: Request, res: Response) => {
       projectId as string,
       req.user!.id,
     );
-    res.status(200).json(tasks);
+    res.status(200).json({ success: true, data: tasks });
   } catch (error: any) {
     res
       .status(error.message === "Unauthorized" ? 403 : 400)
@@ -68,8 +68,11 @@ export const deleteTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = ParamsIdSchema.parse(req.params);
 
-    await taskService.deleteTask(taskId as string, req.user!.id);
-    res.status(204).send();
+    const deletedTask = await taskService.deleteTask(
+      taskId as string,
+      req.user!.id,
+    );
+    res.status(204).json(deletedTask);
   } catch (error: any) {
     res
       .status(error.message === "Unauthorized" ? 403 : 400)

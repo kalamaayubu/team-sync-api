@@ -4,6 +4,7 @@ import userRoutes from "./routes/user.routes.js";
 import fileRoutes from "./routes/file.routes.js";
 import teamsRoutes from "./routes/team.routes.js";
 import projectRoutes from "./routes/project.route.js";
+import "./subscribers/task.subscriber.js"; // Subscriber registration
 
 import path from "node:path";
 

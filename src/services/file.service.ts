@@ -43,7 +43,16 @@ export const getTaskFiles = async (taskId: string, userId: string) => {
 
   await ensureMembership(task.project.teamId, userId);
 
-  return await prisma.file.findMany({ where: { taskId } });
+  return await prisma.file.findMany({
+    where: { taskId },
+    select: {
+      id: true,
+      name: true,
+      url: true,
+      createdAt: true,
+      uploaderId: true,
+    },
+  });
 };
 
 export const deleteFile = async (fileId: string, userId: string) => {
