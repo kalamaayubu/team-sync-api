@@ -9,19 +9,23 @@ export const uploadFile = async (data: {
   taskId: string;
   uploaderId: string;
 }) => {
-  // Find the task to get the teamId
   const task = await prisma.task.findUnique({
     where: { id: data.taskId },
+    include: {
+      project: { select: { id: true, teamId: true } },
+    },
   });
+
   if (!task) throw new Error("Task not found");
 
-  await ensureMembership(task.teamId, data.uploaderId);
+  await ensureMembership(task.project.teamId, data.uploaderId);
 
   // Save file record to DB
   return await prisma.file.create({
     data: {
       name: data.name,
       url: data.url,
+      projectId: task.projectId,
       taskId: data.taskId,
       uploaderId: data.uploaderId,
     },
@@ -29,23 +33,36 @@ export const uploadFile = async (data: {
 };
 
 export const getTaskFiles = async (taskId: string, userId: string) => {
-  const task = await prisma.task.findUnique({ where: { id: taskId } });
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: {
+      project: { select: { id: true, teamId: true } },
+    },
+  });
   if (!task) throw new Error("Task not found");
 
-  await ensureMembership(task.teamId, userId);
+  await ensureMembership(task.project.teamId, userId);
 
   return await prisma.file.findMany({ where: { taskId } });
 };
 
 export const deleteFile = async (fileId: string, userId: string) => {
   const file = await prisma.file.findUnique({
-    include: { task: true },
     where: { id: fileId },
+    include: {
+      project: {
+        select: {
+          teamId: true,
+        },
+      },
+    },
   });
 
   if (!file) throw new Error("File not found");
 
-  await ensureMembership(file.task.teamId, userId);
+  await ensureMembership(file.project.teamId, userId);
+  if (file.uploaderId !== userId)
+    throw new Error("Unauthorized: Only the owner can delete this file");
 
   // Remove from local storage
   try {

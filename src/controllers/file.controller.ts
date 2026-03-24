@@ -5,8 +5,6 @@ import { upload } from "../lib/multer.js";
 import { ParamsIdSchema } from "../validators/shared.validator.js";
 
 export const handleFileUpload = async (req: Request, res: Response) => {
-  const { taskId } = ParamsIdSchema.parse(req.params);
-
   console.log("=== DEBUG ===");
   console.log("Content-Type:", req.headers["content-type"]);
 
@@ -24,6 +22,8 @@ export const handleFileUpload = async (req: Request, res: Response) => {
 
     // If multer checks pass, run the uploadFile service:
     try {
+      const { taskId } = ParamsIdSchema.parse(req.params);
+
       if (!req.file) throw new Error("No file selected.");
 
       const fileRecord = await fileService.uploadFile({

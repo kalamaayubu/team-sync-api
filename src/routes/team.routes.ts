@@ -18,7 +18,7 @@ router.post("/accept", authenticate, InviteCtrl.acceptInvite);
 // Task operations
 router.post("/:projectId/tasks", authenticate, TaskCtrl.createTask);
 router.get("/:projectId/tasks", authenticate, TaskCtrl.getTasks);
-router.patch("/:projectId/tasks/:taskId", authenticate, TaskCtrl.updateTask);
-router.delete("/:projectId/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
+router.patch("/tasks/:taskId", authenticate, TaskCtrl.updateTask);
+router.delete("/tasks/:taskId", authenticate, TaskCtrl.deleteTask);
 
 export default router;
