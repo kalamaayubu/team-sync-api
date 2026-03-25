@@ -79,3 +79,19 @@ export const deleteTask = async (req: Request, res: Response) => {
       .json({ error: error.message });
   }
 };
+
+export const assignTask = async (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const { assigneeId } = req.body; // Validated via Zod usually
+
+  const task = await taskService.assignTask(
+    taskId as string,
+    assigneeId,
+    req.user!.id,
+  );
+
+  res.status(200).json({
+    message: `Task assigned to ${task.assignee?.name}`,
+    task,
+  });
+};

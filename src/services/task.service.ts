@@ -1,6 +1,6 @@
 import { eventEmitter, EVENTS } from "../lib/events.js";
 import { prisma } from "../lib/prisma.js";
-import { ensureMembership } from "../utils/guards.js";
+import { ensureIsAdmin, ensureMembership } from "../utils/guards.js";
 
 export const createTask = async (data: {
   title: string;
@@ -106,4 +106,56 @@ export const deleteTask = async (taskId: string, userId: string) => {
   eventEmitter.emit(EVENTS.TASK.DELETED, {
     task: deletedTask,
   });
+};
+
+// Task Assignement
+export const assignTask = async (
+  taskId: string,
+  assigneeId: string,
+  actorId: string,
+) => {
+  // Fetch task and check team context
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: {
+      project: {
+        select: { teamId: true },
+      },
+    },
+  });
+
+  if (!task) throw new Error("Task not found");
+
+  // Extract the teamId from the nested project object
+  const targetTeamId = task.project.teamId;
+
+  await ensureIsAdmin(targetTeamId, actorId);
+
+  try {
+    await ensureMembership(targetTeamId, assigneeId);
+  } catch (error) {
+    // Adjust error to be specific to assignment
+    throw new Error(
+      "Target user is not a member of this team and cannot be assigned tasks.",
+    );
+  }
+
+  // Update the task
+  const updatedTask = await prisma.task.update({
+    where: { id: taskId },
+    data: { assigneeId },
+    include: {
+      assignee: { select: { name: true, email: true } },
+      project: { select: { name: true } },
+    },
+  });
+
+  // TODO: Notification later
+  eventEmitter.emit(EVENTS.TASK.UPDATED, {
+    task: updatedTask,
+    action: "ASSIGNED",
+    actorId,
+  });
+
+  return updatedTask;
 };

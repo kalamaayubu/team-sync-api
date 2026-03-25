@@ -3,6 +3,7 @@ import express from "express";
 import userRoutes from "./routes/user.routes.js";
 import fileRoutes from "./routes/file.routes.js";
 import teamsRoutes from "./routes/team.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 import projectRoutes from "./routes/project.route.js";
 import activityLogRoutes from "./routes/project.route.js";
 
@@ -19,6 +20,8 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api", fileRoutes);
 app.use("/api/teams", teamsRoutes);
+app.use("/api/teams", taskRoutes);
+
 app.use("/api", projectRoutes);
 app.use("api", activityLogRoutes);
 
