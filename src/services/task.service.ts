@@ -41,6 +41,7 @@ export const createTask = async (data: {
   eventEmitter.emit(EVENTS.TASK.CREATED, {
     task: newTask,
     creatorName: newTask.creator.name,
+    teamId: project.teamId,
   });
 
   return newTask;
