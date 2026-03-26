@@ -31,11 +31,11 @@ export const getTeam = async (req: Request, res: Response) => {
 
 export const addMember = async (req: Request, res: Response) => {
   try {
-    const { id: teamId } = ParamsIdSchema.parse(req.params);
+    const { teamId } = ParamsIdSchema.parse(req.params);
     const { email } = addMemberSchema.parse(req.body);
 
     const newMember = await teamService.addMemberToTeam(
-      teamId,
+      teamId as string,
       req.user!.id,
       email,
     );

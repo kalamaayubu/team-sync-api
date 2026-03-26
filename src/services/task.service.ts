@@ -1,3 +1,4 @@
+import { TASK_STATUS, VALID_TRANSITIONS } from "../lib/constants.js";
 import { eventEmitter, EVENTS } from "../lib/events.js";
 import { prisma } from "../lib/prisma.js";
 import { ensureIsAdmin, ensureMembership } from "../utils/guards.js";
@@ -28,7 +29,6 @@ export const createTask = async (data: {
     select: {
       id: true,
       title: true,
-      description: true,
       creator: {
         select: {
           name: true,
@@ -108,31 +108,39 @@ export const deleteTask = async (taskId: string, userId: string) => {
   });
 };
 
-// Task Assignement
 export const assignTask = async (
   taskId: string,
+  teamId: string,
   assigneeId: string,
   actorId: string,
+  overwrite: boolean = false,
 ) => {
-  // Fetch task and check team context
-  const task = await prisma.task.findUnique({
+  await ensureIsAdmin(teamId, actorId);
+
+  // Check if task already has an assignee
+  const existingTask = await prisma.task.findUnique({
     where: { id: taskId },
-    include: {
-      project: {
-        select: { teamId: true },
-      },
+    select: {
+      assigneeId: true,
+      assignee: { select: { name: true } },
     },
   });
 
-  if (!task) throw new Error("Task not found");
+  if (!existingTask) throw new Error("Task not found");
 
-  // Extract the teamId from the nested project object
-  const targetTeamId = task.project.teamId;
-
-  await ensureIsAdmin(targetTeamId, actorId);
+  // If it's already assigned and we aren't told to overwrite
+  if (
+    existingTask.assigneeId &&
+    existingTask.assigneeId !== assigneeId &&
+    !overwrite
+  ) {
+    throw new Error(
+      `Task is already assigned to ${existingTask.assignee?.name}. Confirm overwrite.`,
+    );
+  }
 
   try {
-    await ensureMembership(targetTeamId, assigneeId);
+    await ensureMembership(teamId, assigneeId);
   } catch (error) {
     // Adjust error to be specific to assignment
     throw new Error(
@@ -140,13 +148,17 @@ export const assignTask = async (
     );
   }
 
-  // Update the task
+  // Perform update
   const updatedTask = await prisma.task.update({
     where: { id: taskId },
     data: { assigneeId },
-    include: {
-      assignee: { select: { name: true, email: true } },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      status: true,
       project: { select: { name: true } },
+      assignee: { select: { name: true, email: true } },
     },
   });
 
@@ -155,6 +167,53 @@ export const assignTask = async (
     task: updatedTask,
     action: "ASSIGNED",
     actorId,
+  });
+
+  return updatedTask;
+};
+
+export const updateTaskStatus = async (
+  taskId: string,
+  newStatus: keyof typeof TASK_STATUS,
+  userId: string,
+) => {
+  // Fetch Task with Project/Team context
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: { project: { select: { teamId: true } } },
+  });
+
+  if (!task) throw new Error("Task not found");
+  await ensureMembership(task.project.teamId, userId);
+
+  // Prevent moving to the same status
+  if (task.status === newStatus) {
+    throw new Error(`Task is already in ${newStatus} status.`);
+  }
+
+  // Check if the move is allowed
+  const allowedMoves = VALID_TRANSITIONS[task.status];
+  if (!allowedMoves.includes(newStatus)) {
+    throw new Error(
+      `Invalid transition: Cannot move task from ${task.status} to ${newStatus}`,
+    );
+  }
+
+  const updatedTask = await prisma.task.update({
+    where: { id: taskId },
+    data: { status: newStatus },
+    include: {
+      assignee: { select: { name: true } },
+      project: { select: { name: true } },
+    },
+  });
+
+  eventEmitter.emit(EVENTS.TASK.UPDATED, {
+    task: updatedTask,
+    action: "STATUS_CHANGE",
+    actorId: userId,
+    oldStatus: task.status,
+    newStatus: updatedTask.status,
   });
 
   return updatedTask;

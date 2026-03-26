@@ -3,15 +3,19 @@ import { prisma } from "../lib/prisma.js";
 
 // 1. Listen for Task Creation
 eventEmitter.on(EVENTS.TASK.CREATED, async ({ task, creatorName }) => {
-  await prisma.activityLog.create({
-    data: {
-      action: "TASK_CREATED",
-      message: `${creatorName} created the task: "${task.title}"`,
-      userId: task.creatorId,
-      teamId: task.teamId, // Ensure your Task object includes teamId
-      entityId: task.id,
-    },
-  });
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: "TASK_CREATED",
+        message: `${creatorName} created the task: "${task.title}"`,
+        userId: task.creatorId,
+        teamId: task.teamId, // Ensure your Task object includes teamId
+        entityId: task.id,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to create activity log:", error);
+  }
 });
 
 // 2. Listen for Task Deletion

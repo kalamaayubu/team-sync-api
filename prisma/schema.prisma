@@ -8,30 +8,27 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  createdAt DateTime @default(now())
-
-  projects   Project[]
-  files      File[]
-  membership Membership[]
-  // tasks      Task[]
-  assignedTasks Task[] @relation("AssignedTasks")
-  createdTasks Task[] @relation("CreatedTasks")
-  activities ActivityLog[]
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  createdAt     DateTime      @default(now())
+  password      String
+  activities    ActivityLog[]
+  files         File[]
+  membership    Membership[]
+  projects      Project[]
+  assignedTasks Task[]        @relation("AssignedTasks")
+  createdTasks  Task[]        @relation("CreatedTasks")
 }
 
 model Team {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-
-  projects    Project[]
-  membership  Membership[]
+  id          String        @id @default(cuid())
+  name        String
+  createdAt   DateTime      @default(now())
+  activities  ActivityLog[]
   invitations Invitation[]
-  activities ActivityLog[]
+  membership  Membership[]
+  projects    Project[]
 }
 
 model Membership {
@@ -46,43 +43,33 @@ model Membership {
 }
 
 model Task {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
   description String
-  status      String @default("todo")
-
-  creatorId String
-  creator   User   @relation("CreatedTasks",fields: [creatorId], references: [id])
-
+  status      String   @default("todo")
+  creatorId   String
+  createdAt   DateTime @default(now())
+  projectId   String
   assigneeId  String?
+  files       File[]
   assignee    User?    @relation("AssignedTasks", fields: [assigneeId], references: [id])
-
-  // Tasks belong to projects
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  files     File[]
+  creator     User     @relation("CreatedTasks", fields: [creatorId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([title, projectId])
 }
 
 model File {
-  id         String   @id @default(cuid())
-  name       String
-  url        String
-  uploaderId String
-  createdAt  DateTime @default(now())
-
-  // File belong to a task, otherwise its global
-  taskId String?
-  task   Task?   @relation(fields: [taskId], references: [id])
-
-  projectId String
-  project   Project @relation("ProjectFiles", fields: [projectId], references: [id], onDelete: Cascade)
-
-  uploader User @relation(fields: [uploaderId], references: [id])
-
+  id                String   @id @default(cuid())
+  name              String
+  url               String
+  taskId            String?
+  uploaderId        String
+  createdAt         DateTime @default(now())
+  projectId         String
+  project           Project  @relation("ProjectFiles", fields: [projectId], references: [id], onDelete: Cascade)
+  task              Task?    @relation(fields: [taskId], references: [id])
+  uploader          User     @relation(fields: [uploaderId], references: [id])
   ProjectCoverImage Project? @relation("ProjectCoverImage")
 }
 
@@ -100,48 +87,35 @@ model Invitation {
 }
 
 model Project {
-  id          String @id @default(cuid())
-  name        String @db.VarChar(100)
-  description String @db.Text
-
-  teamId String
-  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
-
-  // Project tasks and files
-  tasks Task[]
-  files File[] @relation("ProjectFiles")
-
-  coverImageId String? @unique
-  coverImage   File?   @relation("ProjectCoverImage", fields: [coverImageId], references: [id], onDelete: SetNull)
-
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(100)
+  description  String
+  teamId       String
+  coverImageId String?  @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  authorId     String
+  files        File[]   @relation("ProjectFiles")
+  author       User     @relation(fields: [authorId], references: [id])
+  coverImage   File?    @relation("ProjectCoverImage", fields: [coverImageId], references: [id])
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  tasks        Task[]
 
   @@unique([name, teamId])
 }
 
 model ActivityLog {
   id        String   @id @default(cuid())
-  action    String   // e.g., "TASK_CREATED", "PROJECT_DELETED"
-  message   String   // Human-readable: "Joe created task 'Fix API'"
-  
+  action    String
+  message   String
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
   teamId    String
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  // Link to the specific entity (Task, Project, etc.)
-  entityId  String?  
-  
+  entityId  String?
   createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@index([teamId]) // Crucial for performance when loading a Team Feed
+  @@index([teamId])
   @@index([userId])
 }
-
-

@@ -57,16 +57,21 @@ export const addMemberToTeam = async (
   // Find the invitee by email
   const invitee = await prisma.user.findUnique({
     where: { email: inviteeEmail.toLowerCase() },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
   });
 
-  console.log("INVITEEID: ", invitee?.id);
+  console.log("INVITEE-ID: ", invitee?.id);
 
   if (!invitee) {
     throw new Error("User with this email does not exist.");
   }
 
   if (invitee.id === adminId) {
-    throw new Error("You are already the admin of this team.");
+    throw new Error("You are the admin of this team already.");
   }
 
   // Ensure user is an ADMIN of this team
@@ -100,10 +105,12 @@ export const addMemberToTeam = async (
       userId: invitee.id,
       role: "MEMBER",
     },
-    include: {
+    select: {
+      id: true,
       user: {
         select: { name: true, email: true },
       },
+      role: true,
     },
   });
 };
