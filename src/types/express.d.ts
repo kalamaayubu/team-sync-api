@@ -1,3 +1,4 @@
+import { RateLimitInfo } from "express-rate-limit";
 import "express-serve-static-core";
 
 // 1. Define your domain types here
@@ -13,5 +14,13 @@ declare module "express-serve-static-core" {
       id: UserId;
       email: string;
     };
+  }
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      rateLimit: RateLimitInfo;
+    }
   }
 }

@@ -13,6 +13,10 @@ import activityLogRoutes from "./routes/project.route.js";
 import "./subscribers/task.subscriber.js";
 import "./subscribers/activity.subscriber.js";
 import { initSocket } from "./lib/socket.js";
+import {
+  apiLimiter,
+  authLimter,
+} from "./middleware/rate-limiter.middleware.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,6 +26,13 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Initialize Socket.io
 initSocket(httpServer);
+
+// Global rate limiter to all API routes
+app.use("api", apiLimiter);
+
+// Stricter limit for sensitive routes
+app.use("/api/users/login", authLimter);
+app.use("/api/users/register", authLimter);
 
 // Use routes
 app.use("/api/users", userRoutes);
