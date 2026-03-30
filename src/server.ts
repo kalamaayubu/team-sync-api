@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import { createServer } from "http";
+import { initSocket } from "./lib/socket.js";
 
 import userRoutes from "./routes/user.routes.js";
 import fileRoutes from "./routes/file.routes.js";
@@ -10,13 +11,13 @@ import taskRoutes from "./routes/task.routes.js";
 import projectRoutes from "./routes/project.route.js";
 import activityLogRoutes from "./routes/project.route.js";
 
-import "./subscribers/task.subscriber.js";
-import "./subscribers/activity.subscriber.js";
-import { initSocket } from "./lib/socket.js";
 import {
   apiLimiter,
   authLimter,
 } from "./middleware/rate-limiter.middleware.js";
+
+import "./subscribers/task.subscriber.js";
+import "./subscribers/activity.subscriber.js";
 
 const app = express();
 const httpServer = createServer(app);

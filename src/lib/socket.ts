@@ -3,10 +3,15 @@ import { Server } from "socket.io";
 import { eventEmitter, EVENTS } from "./events.js";
 import { verifyToken } from "../middleware/auth.middleware.js";
 import { ensureMembership } from "../utils/guards.js";
+import {
+  clearSocketLimit,
+  socketRateLimiter,
+} from "../utils/socket-rate-limiter.js";
 
 let io: Server;
 
 export const initSocket = (server: HttpServer) => {
+  // Socket initialization
   io = new Server(server, {
     cors: {
       origin: "*",
@@ -34,6 +39,9 @@ export const initSocket = (server: HttpServer) => {
   io.on("connection", (socket) => {
     console.log(`⚡ User Connected: ${socket.id}`);
 
+    // Rate limiter
+    socket.use(socketRateLimiter(socket));
+
     // AUTHORIZATION: Ensure user is a team member
     socket.on("join_team", async (teamId: string) => {
       await ensureMembership(teamId, socket.data?.user.id);
@@ -44,6 +52,7 @@ export const initSocket = (server: HttpServer) => {
 
     socket.on("disconnect", () => {
       console.log("🔥 User Disconnected");
+      clearSocketLimit(socket.id);
     });
   });
 
