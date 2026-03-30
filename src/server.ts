@@ -1,5 +1,8 @@
 import "dotenv/config";
 import express from "express";
+import path from "node:path";
+import { createServer } from "http";
+
 import userRoutes from "./routes/user.routes.js";
 import fileRoutes from "./routes/file.routes.js";
 import teamsRoutes from "./routes/team.routes.js";
@@ -9,12 +12,16 @@ import activityLogRoutes from "./routes/project.route.js";
 
 import "./subscribers/task.subscriber.js";
 import "./subscribers/activity.subscriber.js";
-
-import path from "node:path";
+import { initSocket } from "./lib/socket.js";
 
 const app = express();
+const httpServer = createServer(app);
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// Initialize Socket.io
+initSocket(httpServer);
 
 // Use routes
 app.use("/api/users", userRoutes);
@@ -26,6 +33,6 @@ app.use("/api", projectRoutes);
 app.use("api", activityLogRoutes);
 
 const PORT = process.env.PORT || 8081;
-app.listen(PORT, () =>
-  console.log(`\n\n Server running on http://localhost:${PORT}.`),
-);
+httpServer.listen(PORT, () => {
+  console.log(`🚀 TeamSync Engine running on http://localhost:${PORT}`);
+});

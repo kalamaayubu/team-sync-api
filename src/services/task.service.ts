@@ -82,10 +82,21 @@ export const updateTask = async (taskId: string, userId: string, data: any) => {
   const updatedTask = await prisma.task.update({
     where: { id: taskId },
     data,
+    select: {
+      title: true,
+      description: true,
+      project: {
+        select: { teamId: true },
+      },
+    },
   });
 
   // Emit task update event
-  eventEmitter.emit(EVENTS.TASK.UPDATED, { task: updatedTask });
+  eventEmitter.emit(EVENTS.TASK.UPDATED, {
+    task: updatedTask,
+    teamId: updatedTask.project.teamId,
+    action: `${EVENTS.TASK.UPDATED}`,
+  });
 
   return updatedTask;
 };
