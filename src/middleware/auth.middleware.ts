@@ -23,3 +23,10 @@ export const authenticate = (
     res.status(401).json({ error: "Invalid token" });
   }
 };
+
+export const verifyToken = (token: string) => {
+  return jwt.verify(token, process.env.JWT_SECRET!) as {
+    id: string;
+    email: string;
+  };
+};
