@@ -1,15 +1,10 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import path from "node:path";
 import { createServer } from "http";
 import { initSocket } from "./lib/socket.js";
-
-import userRoutes from "./routes/user.routes.js";
-import fileRoutes from "./routes/file.routes.js";
-import teamsRoutes from "./routes/team.routes.js";
-import taskRoutes from "./routes/task.routes.js";
-import projectRoutes from "./routes/project.route.js";
-import activityLogRoutes from "./routes/project.route.js";
+import apiRoutes from "./routes/index.js";
 
 import {
   apiLimiter,
@@ -22,29 +17,32 @@ import "./subscribers/activity.subscriber.js";
 const app = express();
 const httpServer = createServer(app);
 
+// 1. CORS - Handshake security
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }),
+);
+
+// 2. Middleware & Statics
 app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// Initialize Socket.io
+// 3. Real-time Engine
 initSocket(httpServer);
 
-// Global rate limiter to all API routes
-app.use("api", apiLimiter);
+// 4. Strict Rate Limits (Must be defined before general routes)
+app.use("/v0.7/users/login", authLimter);
+app.use("/v0.7/users/register", authLimter);
 
-// Stricter limit for sensitive routes
-app.use("/api/users/login", authLimter);
-app.use("/api/users/register", authLimter);
-
-// Use routes
-app.use("/api/users", userRoutes);
-app.use("/api", fileRoutes);
-app.use("/api/teams", teamsRoutes);
-app.use("/api/teams", taskRoutes);
-
-app.use("/api", projectRoutes);
-app.use("api", activityLogRoutes);
+// 5. Centralized API Routing
+app.use("/v0.7", apiLimiter, apiRoutes);
 
 const PORT = process.env.PORT || 8081;
+
+// Use httpServer.listen instead of app.listen to support WebSockets
 httpServer.listen(PORT, () => {
   console.log(`🚀 TeamSync Engine running on http://localhost:${PORT}`);
 });
