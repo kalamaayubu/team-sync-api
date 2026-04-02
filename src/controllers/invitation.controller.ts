@@ -8,7 +8,10 @@ export const sendInvite = async (req: Request, res: Response) => {
     const { id: teamId } = ParamsIdSchema.parse(req.params);
 
     // Create the invite record
-    const invite = await InvitationService.createInvitation(email, teamId);
+    const invite = await InvitationService.createInvitation(
+      email,
+      teamId as string,
+    );
 
     res.status(201).json({
       message: "Invitation generated successfully.",
