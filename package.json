@@ -5,9 +5,9 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx --env-file=.env watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node --env-file=.env dist/server.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],
@@ -35,7 +35,6 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^25.4.0",
     "chokidar-cli": "^3.0.0",
-    "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-node": "^11.1.0",
