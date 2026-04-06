@@ -19,7 +19,7 @@ const httpServer = createServer(app);
 // 1. CORS - Handshake security
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: ["http://localhost:5173", "https://team-sync-api.up.railway.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),

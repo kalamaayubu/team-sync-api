@@ -14,7 +14,7 @@ export const initSocket = (server: HttpServer) => {
   // Socket initialization
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:3000",
+      origin: ["http://localhost:5173", "https://team-sync-api.up.railway.app"],
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       credentials: true,
     },
