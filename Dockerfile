@@ -22,17 +22,19 @@ WORKDIR /app
 # Copy the compiled code from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
 
 # Install only production dependencies
 RUN npm ci --only=production --ignore-scripts
+
+#Copy the generated client
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
 # Switch to non-root user
 USER nodejs
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD [ "node", "dist/server.js" ]
