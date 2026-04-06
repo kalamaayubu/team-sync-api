@@ -19,7 +19,7 @@ export const createTeam = async (req: Request, res: Response) => {
 export const getTeam = async (req: Request, res: Response) => {
   try {
     const { id: teamId } = ParamsIdSchema.parse(req.params);
-    const team = await teamService.getTeamById(teamId, req.user!.id);
+    const team = await teamService.getTeamById(teamId as string, req.user!.id);
 
     if (!team)
       return res.status(404).json({ error: "Access denied. Team not found" });
