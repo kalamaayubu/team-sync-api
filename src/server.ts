@@ -14,6 +14,7 @@ import "./subscribers/task.subscriber.js";
 import "./subscribers/activity.subscriber.js";
 
 const app = express();
+
 const httpServer = createServer(app);
 
 // 1. CORS - Handshake security
@@ -26,7 +27,10 @@ app.use(
 );
 
 // 2. Middleware & Statics
+app.set("trust proxy", 1); // Railway rate limiting
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // 3. Real-time Engine
