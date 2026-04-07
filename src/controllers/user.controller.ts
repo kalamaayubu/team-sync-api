@@ -18,6 +18,12 @@ export const registerUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
+    console.log("DEBUG: Request Body is ->", req.body);
+    console.log("DEBUG: Email type is ->", typeof req.body.email);
+
+    if (!req.body.email) {
+      return res.status(400).json({ error: "Email is missing from the body!" });
+    }
     const validated = loginSchema.parse(req.body);
     const token = await userService.authenticateUser(validated);
     res.json({ token });

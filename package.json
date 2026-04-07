@@ -5,10 +5,11 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx --env-file=.env watch src/server.ts",
-    "build": "tsc",
+    "dev": "tsx --env-file=.env --watch src/server.ts",
+    "build": "prisma generate && tsc",
     "start": "node --env-file=.env dist/server.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "node --env-file=.env node_modules/.bin/prisma db push"
   },
   "keywords": [],
   "author": "",
