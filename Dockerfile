@@ -24,10 +24,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
-COPY --from=builder /app/src/generated ./dist/generated
+COPY --from=builder /app/src/generated ./src/generated
 
 # Install only production dependencies
-RUN npm ci --only=production --ignore-scripts
+RUN npm ci --only=production
 
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
