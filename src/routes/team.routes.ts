@@ -9,6 +9,7 @@ const router = Router();
 router.post("", authenticate, TeamCtrl.createTeam);
 router.post("/:teamId/members", authenticate, TeamCtrl.addMember);
 router.get("/:teamId", authenticate, TeamCtrl.getTeam);
+router.delete("/:teamId", authenticate, TeamCtrl.deleteTeam);
 
 // Invitations
 router.post("/:teamId/invite", authenticate, InviteCtrl.sendInvite);

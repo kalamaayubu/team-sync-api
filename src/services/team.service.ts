@@ -1,6 +1,21 @@
 import { prisma } from "../lib/prisma.js";
+import { ensureIsAdmin } from "../utils/guards.js";
 
 export const createTeam = async (name: string, ownerId: string) => {
+  // Check for duplicate team name
+  const existingTeam = await prisma.team.findFirst({
+    where: {
+      name,
+      ownerId,
+    },
+  });
+
+  if (existingTeam) {
+    throw new Error(
+      "You already have a team with this name. Try a different name.",
+    );
+  }
+
   // A user can create a maximum of 4 teams
   const teamCount = await prisma.membership.count({
     where: {
@@ -16,6 +31,7 @@ export const createTeam = async (name: string, ownerId: string) => {
   return await prisma.team.create({
     data: {
       name,
+      ownerId,
       membership: {
         create: {
           userId: ownerId,
@@ -111,6 +127,28 @@ export const addMemberToTeam = async (
         select: { name: true, email: true },
       },
       role: true,
+    },
+  });
+};
+
+export const deleteTeam = async (teamId: string, requestingUserId: string) => {
+  if (!ensureIsAdmin) {
+    throw new Error("Unauthorized: Only team admins can delete the team.");
+  }
+
+  // Check if team exists
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+  });
+
+  if (!team) {
+    throw new Error("Team not found.");
+  }
+
+  return await prisma.team.delete({
+    where: { id: teamId },
+    include: {
+      membership: true, // Include deleted memberships in response
     },
   });
 };

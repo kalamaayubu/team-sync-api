@@ -9,7 +9,7 @@ eventEmitter.on(EVENTS.TASK.CREATED, async ({ task, creatorName }) => {
         action: "TASK_CREATED",
         message: `${creatorName} created the task: "${task.title}"`,
         userId: task.creatorId,
-        teamId: task.teamId, // Ensure your Task object includes teamId
+        teamId: task.teamId,
         entityId: task.id,
       },
     });

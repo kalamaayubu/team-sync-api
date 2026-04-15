@@ -18,7 +18,7 @@ export const ensureIsAdmin = async (teamId: string, userId: string) => {
   });
 
   if (!admin) {
-    throw new Error("Unauthorized: Only admin can create project.");
+    throw new Error("Unauthorized: Only admin is allowed to do this.");
   }
 
   return admin;

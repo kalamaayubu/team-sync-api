@@ -13,6 +13,8 @@ model User {
   name          String
   createdAt     DateTime      @default(now())
   password      String
+
+  team Team[]
   activities    ActivityLog[]
   files         File[]
   membership    Membership[]
@@ -24,11 +26,16 @@ model User {
 model Team {
   id          String        @id @default(cuid())
   name        String
+  ownerId     String 
   createdAt   DateTime      @default(now())
+  
   activities  ActivityLog[]
   invitations Invitation[]
   membership  Membership[]
   projects    Project[]
+  owner User @relation(fields: [ownerId], references: [id])
+
+  @@unique([name, ownerId])
 }
 
 model Membership {
@@ -36,8 +43,8 @@ model Membership {
   userId String
   teamId String
   role   String @default("MEMBER")
-  team   Team   @relation(fields: [teamId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
 }

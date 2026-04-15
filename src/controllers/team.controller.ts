@@ -44,3 +44,22 @@ export const addMember = async (req: Request, res: Response) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const deleteTeam = async (req: Request, res: Response) => {
+  try {
+    const { teamId } = ParamsIdSchema.parse(req.params);
+
+    const deletedTeam = await teamService.deleteTeam(
+      teamId as string,
+      req.user!.id,
+    );
+
+    res.json({
+      message: "Team deleted successfully",
+      team: deletedTeam,
+    });
+  } catch (error: any) {
+    const status = error.message.includes("Unauthorized") ? 403 : 400;
+    res.status(status).json({ error: error.message });
+  }
+};
