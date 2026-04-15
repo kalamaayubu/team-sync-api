@@ -43,9 +43,8 @@ app.use("/v0.7/users/register", authLimter);
 // 5. Centralized API Routing
 app.use("/v0.7", apiLimiter, apiRoutes);
 
-const PORT = process.env.PORT || 8081;
-
+const PORT: number = Number(process.env.PORT) || 8081;
 // Use httpServer.listen instead of app.listen to support WebSockets
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 TeamSync Engine running on http://localhost:${PORT}`);
 });
